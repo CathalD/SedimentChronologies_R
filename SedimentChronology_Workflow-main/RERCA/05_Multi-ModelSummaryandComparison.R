@@ -507,7 +507,7 @@ cat("Saved report data snapshot:", report_data_path, "\n")
 # --- 9b. Write the .qmd file ---
 qmd_path <- file.path(output_dir, "05_RERCA_Report.qmd")
 
-qmd_text <- r"qmd(---
+qmd_text <- r"---(---
 title: "Pb-210 Sediment Chronology — RERCA Summary Report"
 subtitle: "Multi-model age-depth comparison and carbon accumulation readiness assessment"
 date: today
@@ -923,7 +923,7 @@ RERCA reconstruction. Items are ordered by priority.
 ```{r session-info}
 sessionInfo()
 ```
-)qmd"
+)---"
 
 writeLines(qmd_text, qmd_path)
 cat("Saved Quarto report template:", qmd_path, "\n")
