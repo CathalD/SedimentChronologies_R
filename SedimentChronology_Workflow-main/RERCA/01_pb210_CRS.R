@@ -53,6 +53,7 @@ library(tidyr)
 # The example dataset ships with this repository.
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste the full path to your CSV here, e.g.:
+# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 
 core_raw <- read.csv(data_file, na.strings = c("NA", ""))
 
@@ -346,6 +347,40 @@ p3 <- ggplot(core_dated %>% filter(!is.na(sed_rate_cm_yr)),
   theme_bw(base_size = 12)
 
 print(p3)
+
+# =============================================================================
+# SAVE OUTPUTS for script 05_summary.R
+# =============================================================================
+dir.create("RERCA/output", showWarnings = FALSE, recursive = TRUE)
+
+# Age-depth table
+crs_out <- core_dated %>%
+  select(depth_cm, age, age_sd, age_min_yr, age_max_yr, sed_rate_cm_yr) %>%
+  mutate(model = "pb210_CRS")
+write.csv(crs_out, "RERCA/output/01_crs_ages.csv", row.names = FALSE)
+
+# Activity profile
+act_out <- core_raw %>%
+  filter(!is.na(pb210_total_dpm_g)) %>%
+  select(depth_cm, pb210_total_dpm_g, pb210_error_dpm_g,
+         pb210_supported, pb210_unsupported, pb210_unsupported_err)
+write.csv(act_out, "RERCA/output/01_activity_profile.csv", row.names = FALSE)
+
+# Model statistics
+stats_out <- data.frame(
+  model            = "pb210_CRS",
+  method           = "CRS (Constant Rate of Supply)",
+  package          = "pb210 (paleolimbot)",
+  n_sections_dated = nrow(core_dated),
+  datable_depth_cm = max(core_dated$depth_cm, na.rm = TRUE),
+  oldest_age_yr    = max(core_dated$age, na.rm = TRUE),
+  oldest_age_95_lo = max(core_dated$age_min_yr, na.rm = TRUE),
+  oldest_age_95_hi = max(core_dated$age_max_yr, na.rm = TRUE),
+  background_dpm_g = unique(core_raw$pb210_supported)[1],
+  stringsAsFactors = FALSE
+)
+write.csv(stats_out, "RERCA/output/01_crs_stats.csv", row.names = FALSE)
+cat("Outputs saved to RERCA/output/\n")
 
 cat("\nScript 01 complete. Review plots and the age-depth table above.\n")
 cat("Next: run 02_rplum.R for the Bayesian Pb-210 approach.\n")
