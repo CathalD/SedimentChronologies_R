@@ -57,6 +57,7 @@ rstan_options(auto_write = TRUE)
 # =============================================================================
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste the full path to your CSV here, e.g.:
+# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 
 core_raw <- read.csv(data_file, na.strings = c("NA", "")) %>%
   mutate(
@@ -305,12 +306,45 @@ cat(sprintf(
 
 
 # =============================================================================
-# STEP 7 — Compare all methods (optional)
+# STEP 7 — Save outputs for script 05_summary.R
 # =============================================================================
-# If you have run scripts 01, 02, and 03 and saved their outputs, load them
-# here to make a direct comparison plot.
+dir.create("RERCA/output", showWarnings = FALSE, recursive = TRUE)
+
+if (exists("age_summary") && !is.null(age_summary)) {
+  bayes_out <- age_summary %>%
+    transmute(
+      depth_cm   = depth_cm,
+      age        = age_mean,
+      age_min_yr = age_lo_95,
+      age_max_yr = age_hi_95,
+      age_lo_50  = age_lo_50,
+      age_hi_50  = age_hi_50,
+      model      = "Bayesian_Stan"
+    )
+  write.csv(bayes_out, "RERCA/output/04_bayesian_ages.csv", row.names = FALSE)
+
+  rhat_summary <- summary(fit, pars = c("phi", "A0", "mean_acc", "sigma_acc"))$summary
+  stats_out <- data.frame(
+    model              = "Bayesian_Stan",
+    method             = "Manual Bayesian (Dunnington 2019)",
+    package            = "rstan",
+    n_sections_dated   = nrow(age_summary),
+    datable_depth_cm   = max(age_summary$depth_cm, na.rm = TRUE),
+    oldest_age_yr      = max(age_summary$age_mean, na.rm = TRUE),
+    oldest_age_95_lo   = max(age_summary$age_lo_95, na.rm = TRUE),
+    oldest_age_95_hi   = max(age_summary$age_hi_95, na.rm = TRUE),
+    phi_mean_dpm_g     = mean(phi_samples),
+    phi_95_lo          = quantile(phi_samples, 0.025),
+    phi_95_hi          = quantile(phi_samples, 0.975),
+    n_divergent        = n_divergent,
+    stringsAsFactors   = FALSE
+  )
+  write.csv(stats_out, "RERCA/output/04_bayesian_stats.csv", row.names = FALSE)
+  cat("Outputs saved to RERCA/output/\n")
+}
 
 cat("\nScript 04 complete.\n")
+cat("Run 05_summary.R to compare all four models side-by-side.\n")
 cat("You have now run all four Pb-210 dating approaches.\n")
 cat("Compare the age-depth plots to assess consistency between methods.\n")
 cat("Consistent results across CRS, rplum, serac, and Bayesian models increase confidence.\n")
