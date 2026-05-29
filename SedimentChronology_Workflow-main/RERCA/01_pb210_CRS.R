@@ -53,7 +53,6 @@ library(tidyr)
 # The example dataset ships with this repository.
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste the full path to your CSV here, e.g.:
-# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 
 core_raw <- read.csv(data_file, na.strings = c("NA", ""))
 
