@@ -71,7 +71,6 @@ DPM_G_TO_BQ_KG <- 16.667   # unit conversion factor
 # =============================================================================
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste full path to your CSV, e.g.:
-# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 
 core_label  <- "MyCore"   # <-- short label, no spaces — used for folder and file names
 coring_year <- 2024       # <-- calendar year core was collected (AD)
