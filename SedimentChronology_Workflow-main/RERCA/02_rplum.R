@@ -51,6 +51,7 @@ library(ggplot2)
 # The function below reads your standard project CSV and converts it.
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste the full path to your CSV here, e.g.:
+# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 core_name <- "MyCore"                               # <-- CHANGE to a short core ID (no spaces)
 
 core_raw <- read.csv(data_file, na.strings = c("NA", ""))
@@ -220,6 +221,38 @@ if (file.exists(crs_result_file) && exists("ages_df")) {
     labs(title = "CRS vs rplum Age-Depth Comparison", colour = "Model") +
     theme_bw(base_size = 12)
   print(p_compare)
+}
+
+# =============================================================================
+# SAVE OUTPUTS for script 05_summary.R
+# =============================================================================
+dir.create("RERCA/output", showWarnings = FALSE, recursive = TRUE)
+
+if (exists("ages_df") && !is.null(ages_df)) {
+  # Convert rplum ages (years relative to coring date, negative = post-coring) to BP
+  rplum_out <- ages_df %>%
+    transmute(
+      depth_cm     = depth,
+      age          = mean,
+      age_min_yr   = min.95,
+      age_max_yr   = max.95,
+      model        = "rplum"
+    )
+  write.csv(rplum_out, "RERCA/output/02_rplum_ages.csv", row.names = FALSE)
+
+  stats_out <- data.frame(
+    model            = "rplum",
+    method           = "Bayesian (Plum/Bacon)",
+    package          = "rplum",
+    n_sections_dated = nrow(ages_df),
+    datable_depth_cm = max(ages_df$depth, na.rm = TRUE),
+    oldest_age_yr    = max(ages_df$mean, na.rm = TRUE),
+    oldest_age_95_lo = max(ages_df$min.95, na.rm = TRUE),
+    oldest_age_95_hi = max(ages_df$max.95, na.rm = TRUE),
+    stringsAsFactors = FALSE
+  )
+  write.csv(stats_out, "RERCA/output/02_rplum_stats.csv", row.names = FALSE)
+  cat("Outputs saved to RERCA/output/\n")
 }
 
 cat("\nScript 02 complete.\n")
