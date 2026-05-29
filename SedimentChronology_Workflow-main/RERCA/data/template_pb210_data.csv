@@ -1,0 +1,37 @@
+upper_depth_cm,lower_depth_cm,dry_bulk_density_g_cm3,pb210_total_dpm_g,pb210_error_dpm_g,ra226_supported_dpm_g,ra226_error_dpm_g,cs137_dpm_g,cs137_error_dpm_g,loi_percent,water_content_percent
+# Instructions:
+# - upper_depth_cm / lower_depth_cm     : depth interval boundaries in cm (REQUIRED)
+# - dry_bulk_density_g_cm3              : dry weight / wet volume in g/cm3 (REQUIRED)
+# - pb210_total_dpm_g                   : total Pb-210 activity in DPM per gram dry weight (REQUIRED)
+# - pb210_error_dpm_g                   : 1 SD counting error on Pb-210 (REQUIRED)
+# - ra226_supported_dpm_g               : supported Pb-210 measured via Ra-226 (OPTIONAL — leave blank if not measured)
+# - ra226_error_dpm_g                   : 1 SD error on Ra-226 (OPTIONAL)
+# - cs137_dpm_g                         : Cs-137 activity in DPM per gram dry weight (OPTIONAL)
+# - cs137_error_dpm_g                   : 1 SD counting error on Cs-137 (OPTIONAL)
+# - loi_percent                         : loss on ignition as a percentage (OPTIONAL)
+# - water_content_percent               : (wet weight - dry weight) / wet weight * 100 (OPTIONAL)
+#
+# Delete these comment lines before loading the file.
+# Replace NA with the measured value, or leave as NA if not measured.
+# Depths should be in ascending order from top (0 cm) to bottom of core.
+0,1,,,,,,,,,
+1,2,,,,,,,,,
+2,3,,,,,,,,,
+3,4,,,,,,,,,
+4,5,,,,,,,,,
+5,6,,,,,,,,,
+6,7,,,,,,,,,
+7,8,,,,,,,,,
+8,9,,,,,,,,,
+9,10,,,,,,,,,
+10,12,,,,,,,,,
+12,14,,,,,,,,,
+14,16,,,,,,,,,
+16,18,,,,,,,,,
+18,20,,,,,,,,,
+20,22,,,,,,,,,
+22,24,,,,,,,,,
+24,26,,,,,,,,,
+26,28,,,,,,,,,
+28,30,,,,,,,,,
+30,32,,,,,,,,,
