@@ -324,6 +324,7 @@ Multiply `car_factor` by your LOI-derived or measured carbon fraction to get RER
 ```{r car-table}
 if (!is.null(car_ready)) {
   car_ready %>%
+    select(-ci_width_yr) %>%
     mutate(
       age_yr_BP          = round(age_yr_BP, 1),
       age_95_lo          = round(age_95_lo, 1),
