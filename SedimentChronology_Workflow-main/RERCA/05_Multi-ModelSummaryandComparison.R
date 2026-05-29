@@ -445,24 +445,30 @@ report_data_path <- file.path(output_dir, "05_report_data.RData")
 # Build the CAR-ready table: everything needed for CAR except %OC / LOI
 # Sedimentation rate comes from CRS; bulk density from the raw activity profile.
 car_ready <- NULL
-if (!is.null(crs_ages) && "sed_rate_cm_yr" %in% names(crs_ages) &&
-    !is.null(activity_df)) {
-
-  bd_df <- activity_df %>%
-    mutate(depth_cm = (upper_depth_cm + lower_depth_cm) / 2) %>%
-    select(depth_cm, bulk_density_g_cm3 = dry_bulk_density_g_cm3)
+if (!is.null(crs_ages) && "sed_rate_cm_yr" %in% names(crs_ages)) {
 
   car_ready <- crs_ages %>%
     filter(!is.na(age), !is.na(sed_rate_cm_yr), sed_rate_cm_yr > 0) %>%
     select(depth_cm, age_yr_BP = age, age_95_lo = age_min_yr,
-           age_95_hi = age_max_yr, sed_rate_cm_yr) %>%
-    left_join(bd_df, by = "depth_cm") %>%
+           age_95_hi = age_max_yr, sed_rate_cm_yr)
+
+  # Join bulk density from the activity profile if the column was saved there
+  if (!is.null(activity_df) && "dry_bulk_density_g_cm3" %in% names(activity_df)) {
+    bd_df <- activity_df %>%
+      select(depth_cm, bulk_density_g_cm3 = dry_bulk_density_g_cm3)
+    car_ready <- car_ready %>% left_join(bd_df, by = "depth_cm")
+  } else {
+    car_ready <- car_ready %>% mutate(bulk_density_g_cm3 = NA_real_)
+    cat("Note: bulk density not found in activity profile CSV.\n")
+    cat("      Add a bulk_density_g_cm3 column to 05_car_ready_table.csv manually.\n")
+  }
+
+  car_ready <- car_ready %>%
     mutate(
-      # pre-compute the non-carbon terms so only LOI/OC needs to be added later
       # CAR (g C m-2 yr-1) = C_fraction * BD (g/cm3) * SAR (cm/yr) * 10000
-      car_factor = bulk_density_g_cm3 * sed_rate_cm_yr * 10000,
-      ci_width_yr = age_95_hi - age_95_lo,
-      ci_pct_age  = round(ci_width_yr / pmax(age_yr_BP, 1) * 100, 1),
+      car_factor       = bulk_density_g_cm3 * sed_rate_cm_yr * 10000,
+      ci_width_yr      = age_95_hi - age_95_lo,
+      ci_pct_age       = round(ci_width_yr / pmax(age_yr_BP, 1) * 100, 1),
       uncertainty_flag = ifelse(ci_pct_age > 50 | is.na(ci_pct_age),
                                 "HIGH — more data needed", "acceptable")
     )
@@ -501,7 +507,7 @@ cat("Saved report data snapshot:", report_data_path, "\n")
 # --- 9b. Write the .qmd file ---
 qmd_path <- file.path(output_dir, "05_RERCA_Report.qmd")
 
-qmd_text <- r"(---
+qmd_text <- r"qmd(---
 title: "Pb-210 Sediment Chronology — RERCA Summary Report"
 subtitle: "Multi-model age-depth comparison and carbon accumulation readiness assessment"
 date: today
@@ -917,7 +923,7 @@ RERCA reconstruction. Items are ordered by priority.
 ```{r session-info}
 sessionInfo()
 ```
-)"
+)qmd"
 
 writeLines(qmd_text, qmd_path)
 cat("Saved Quarto report template:", qmd_path, "\n")
