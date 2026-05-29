@@ -71,6 +71,7 @@ DPM_G_TO_BQ_KG <- 16.667   # unit conversion factor
 # =============================================================================
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste full path to your CSV, e.g.:
+# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 
 core_label  <- "MyCore"   # <-- short label, no spaces — used for folder and file names
 coring_year <- 2024       # <-- calendar year core was collected (AD)
@@ -344,6 +345,32 @@ p_activity <- ggplot(act_data, aes(y = depth_cm)) +
        subtitle = "Blue = total; red = unsupported; dashed = background") +
   theme_bw(base_size = 12)
 print(p_activity)
+
+# =============================================================================
+# SAVE OUTPUTS for script 05_summary.R
+# =============================================================================
+dir.create("RERCA/output", showWarnings = FALSE, recursive = TRUE)
+
+if (exists("ages_all") && !is.null(ages_all) && nrow(ages_all) > 0) {
+  serac_out <- ages_all %>%
+    rename(depth_cm = depth, age_min_yr = age_lo, age_max_yr = age_hi) %>%
+    mutate(model = paste0("serac_", model))
+  write.csv(serac_out, "RERCA/output/03_serac_ages.csv", row.names = FALSE)
+
+  if (exists("cfcs_sar") && !is.null(cfcs_sar)) {
+    stats_out <- data.frame(
+      model            = c("serac_CRS", "serac_CFCS"),
+      method           = c("CRS (serac)", "CFCS (serac)"),
+      package          = "serac",
+      cfcs_sar_mm_yr   = c(NA, abs(cfcs_sar$SAR_mm.yr.1)),
+      cfcs_sar_err     = c(NA, abs(cfcs_sar$error_mm.yr.1)),
+      cfcs_r2          = c(NA, cfcs_sar$R2),
+      stringsAsFactors = FALSE
+    )
+    write.csv(stats_out, "RERCA/output/03_serac_stats.csv", row.names = FALSE)
+  }
+  cat("Outputs saved to RERCA/output/\n")
+}
 
 cat("\nScript 03 complete.\n")
 cat("Next: run 04_bayesian_pb210.R for the manual Bayesian approach.\n")
