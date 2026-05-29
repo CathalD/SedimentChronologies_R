@@ -51,7 +51,6 @@ library(ggplot2)
 # The function below reads your standard project CSV and converts it.
 
 data_file <- "RERCA/data/example_pb210_data.csv"   # <-- CHANGE THIS: paste the full path to your CSV here, e.g.:
-# data_file <- "/Users/cathaldoherty/Desktop/CoastalBC_WorkflowV1/example_pb210_data.csv"
 core_name <- "MyCore"                               # <-- CHANGE to a short core ID (no spaces)
 
 core_raw <- read.csv(data_file, na.strings = c("NA", ""))
